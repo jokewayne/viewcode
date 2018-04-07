@@ -25,3 +25,145 @@ b	lowlevel_init		@ go setup pll,mux,memory
 lowlevel_init.S中有 lowlevel_init
 cp15.c中有 v7_arch_cp15_set_l2aux_ctrl 和 v7_arch_cp15_set_acr
 
+参考
+https://blog.csdn.net/kl1125290220/article/details/78683999
+
+前言
+
+2017.01 UBoot包含两个阶段的启动，一个是SPL启动，一个是正常的启动我们称为第二阶段Uboot。当然
+
+，我们也可以选择使用SPL和不使用。
+在编译的过程中，是先编译第二阶段Uboot，然后在编译SPL的。这两个阶段的编译时分离的。
+拥有不同的配置，所以许多地方的宏是和SPL的不一样。而且链接的文件也不一致。
+所以接下来，我们也会分为两个部分进行分析。
+
+SPL启动
+
+在AM437X平台中，实际的SPL启动就是MLO启动阶段。其运行空间为片内DRAM，所以对其大小有较为严格
+
+的限制。
+通常使用SPL初始化基本设备后，将第二阶段UBoot加载进行SDRAM中执行。
+
+
+第一阶段：和架构相关的初始化
+
+其源码位于arch/arm/cpu/armv7/start.s中。
+其中关键的调用关系如下：
+调用：cpu_init_crit
+        b   lowlevel_init
+            ==>arch/arm/cpu/armv7/lowlevel_init.S
+                b s_init 
+
+第二阶段：和SoC底层相关的初始化
+
+在第一阶段初始化完成后，便调用了s_init函数，其实现的源码是arch/arm/mach-
+
+omap2/an33xx/Borad.c。
+该函数就调用了一个函数rtc_only();然后便返回到lowlevel_init函数中。
+此时，lowlevel_init也已经完成他的任务，就返回到cpu_init_crit中。
+然而，cpu_init_crit这个函数的工作也全都干完了，便回到start.S中，然后便是
+b _main
+
+而这个_main函数位于：
+arch/arm/lib/crt0.S中
+在_main函数中，就调用了一个跨时代的函数。
+board_init_f (arch/arm/mach-omap2/am33xx/Borad.c)
+第三阶段：板级初始化
+
+在上面，我们可以知道 _main函数会调用board_init_f。实际上，这个函数便是和板级相关连的函数了
+
+。
+然而，在SPL启动中，他指向了下面的函数：
+
+void board_init_f(ulong dummy)
+{
+    early_system_init();
+    board_early_init_f();
+    sdram_init();
+    /* dram_init must store complete ramsize in gd->ram_size */
+    gd->ram_size = get_ram_size(
+            (void *)CONFIG_SYS_SDRAM_BASE,
+            CONFIG_MAX_RAM_BANK_SIZE);
+}
+
+
+其中的sdram_ini()； 便是初始化SDRAM的关键代码，所以，如果我们有自己的板子，我们也可以实现
+
+sdram_init函数来完成我们板子的SDRAM的初始化。
+
+其调用关系如下：
+board_init_f
+==>early_system_init()
+==>set_uart_mux_conf(); // 设置相应的PIN为串口
+==>board_early_init_f(); // 不同的板子可以实现这个函数
+==>
+==>sdram_init(); // 初始化SDRAM
+
+执行完borad_init_f后，回到_main
+这个时候，会去执行spl_relocate_stack_gd
+重新定位在栈中的global_data。
+
+如果定义了CONFIG_SPL_STACK_R，那么就将之前在片内内存中的global_data对象重定位到SDRAM中，并
+
+且将栈指针指向SDRAM中的某一地址
+最后，就会调用borad_init_r函数：
+
+borad_init_r(common/spl/spl.c)
+    ==>spl_board_init();    // 初始化串口
+    ==> if (boot_from_devices(&spl_image, spl_boot_list,
+                  ARRAY_SIZE(spl_boot_list))) {
+                puts("SPL: failed to boot from all boot devices\n");
+                hang();
+            }
+            =>遍历loader，看哪个loader和设备匹配。
+            ==> spl_load_image
+                ==>spl_mmc_load_image
+                    ==>spl_mmc_do_fs_boot
+                        ==>spl_load_image_fat(uboot.img)    // 将uboot.img加载到内存，并进
+
+行解析
+
+
+
+将镜像加载到内存的时候，此时SPL进行判断，加载的镜像是uboot还是kernel然后便跳转到镜像的入口
+
+中进行执行。此时，SPL的使命便完成了
+==>jump_to_image_no_args(&spl_image);
+
+第二阶段Uboot
+
+此阶段的UBoot是在内存中的了，内存已经初始化完毕，并且许多的引脚复用在上一个阶段就已经复用完
+
+毕了。
+
+在编译的过程中，是先编译第二阶段Uboot，然后在编译SPL的。这两个阶段的编译时分离的。拥有不同
+
+的配置，所以许多地方的宏是和SPL的不一样。而且
+链接的文件也不一致。
+
+通过验证，就board_init_r函数而言，在SPL中是链接向spl.c中的board_init_r函数，而在Uboot中，是
+
+链接向board_r.c中的borad_init_r函数。
+
+那么，我们就从borad_init_r函数入手，看看第二阶段的Uboot是怎么启动的。
+
+在分析的过程中，
+我们直接在board_init_r函数实现成一个死循环，但是发现还是有信息能够输出，说明在board_init_r
+
+还进行了初始化的工作。
+
+    U-Boot 2017.01-g03781bc-dirty (Jul 14 2017 - 13:55:58 +0800)
+
+    CPU  : AM437X-GP rev 1.2
+    Model: TI AM437x GP EVM
+    I2C:   ready
+    DRAM:  1 GiB
+
+我们发现，其实在board_init_f中都已经链接在别的文件中了，他是位于board_f.c文件中
+
+其中关键的函数就是 initcall_run_list(init_sequence_f);
+我们来看看init_sequence_f是个什么东西。
+
+我们发现这个是个类似数组的玩意。通过函数名，我们大概可以知道，就是一个个按顺序去调用这个数
+
+组里面的函数。
