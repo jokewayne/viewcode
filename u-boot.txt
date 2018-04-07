@@ -1,0 +1,27 @@
+--------------u-boot-mod------------------------
+start.S中调用了以下几个函数
+lowlevel_gpio_init		ar7240\qca_gpio_init.S
+lowlevel_init			ar7240\ar933x_pll_init.S
+simple_mips_cache_reset		cache.S
+mips_cache_lock_24k		cache.S
+board_init_f			lib_mips\board.c     
+board_init_r			lib_mips\board.c
+
+在lib_mips\board.c中board_init_f函数调用了relocate_code，start.S实现relocate_code，
+而relocate_code则调用了board_init_r，而且不再返回。board_init_r函数调用了main_loop()。
+
+--------------u-boot-----------------------------
+首先，找到CPU的入口文件start.S，然后看这个文件调用了哪些函数。
+如armv7中，bl或b都是跳转，有如下行
+bl	cpu_init_cp15       这个函数在本文件
+bl	cpu_init_crit       这个函数在本文件
+bl	_main
+b	switch_to_hypervisor_ret
+bl	v7_arch_cp15_set_l2aux_ctrl
+bl	v7_arch_cp15_set_acr
+b	lowlevel_init		@ go setup pll,mux,memory
+这些都是start.S要调用的函数。
+到其他.c或.S文件找这些函数。
+lowlevel_init.S中有 lowlevel_init
+cp15.c中有 v7_arch_cp15_set_l2aux_ctrl 和 v7_arch_cp15_set_acr
+
