@@ -9,3 +9,8 @@ postcore_initcall(), arch_initcall(), subsys_initcall(), device_initcall(), etc.
 
 对硬件I/O操作
 request_mem_region 与 ioremap
+
+platform的简介
+https://www.cnblogs.com/deng-tao/p/6026373.html
+
+
