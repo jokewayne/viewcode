@@ -13,4 +13,5 @@ request_mem_region 与 ioremap
 platform的简介
 https://www.cnblogs.com/deng-tao/p/6026373.html
 
-
+sysfs   /sys目录讲解
+https://www.ibm.com/developerworks/cn/linux/l-cn-sysfs/
