@@ -1,0 +1,7 @@
+
+http://blog.csdn.net/thl789/article/details/6581146
+在内核源代码中，platform 设备的初始化
+LINUX内核中有很多的初始化指示标志
+postcore_initcall(), arch_initcall(), subsys_initcall(), device_initcall(), etc. 
+这些起什么作用呢？
+见 内核源码 include/linux/init.h，大约在第200行。 
