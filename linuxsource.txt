@@ -1,17 +1,31 @@
+参考　https://blog.csdn.net/yu616568/article/details/7581872 
+
 启动顺序
 ./larch/i386/boot/bootSect.S    #在4.4.38没找到
 –>./larch/i386/boot/setup.S     #在4.4.38没找到
 –>arch/x86/boot/header.S        #calll	main
 –>arch/x86/boot/main.c中的main() 
 ->arch/x86/boot/pm.c中的go_to_protected_mode()
-
+  # 激活A20总线是保护模式在引导阶段的步骤之一，通常在引导程序将控制权交给内核之前完成
+-> arch/i386/boot/pmjump.S  的　protected_mode_jump()    
+  # 入参是　code32_start, 定义在　arch/x86/boot/header.S   值为 0x100000
+  #　即跳转到了 0x100000地址开始执行。  这里是 head_32.S 的 startup_32。 
+  
+arch/i386/kernel/head_32.S　中　，　
+  #完成以下操作：
+·初始化段寄存器和一个临时堆栈
+·初始化BSS段
+·调用解压缩函数decompress_kernel解压缩内核，并将其放到绝对位置0x100000处
+·最后再跳转到真正的内核开始处（0x100000）执行
+解压缩之后的内核开始处放的是arch/i386/kernel/head_32.S的程序，所以这时候要从段代码开始执行，它的入口函数是startup_32（这时候算是真正的内核开始了，所以要好好看一下这段代码究竟完成了什么操作）。
+-------------------------------------------------------------------------------
 汇编INT 0x10h 是输出到显示， 0x16h是读键盘输入, 0x19h是系统自举。即：
 INT 19会将MBR的512字节装载到内存0x7c00中,然后JUMP到0x7c00处,开始执行MBR的可执行程序(master booter)。
----------------------------------------------------------------------
+-------------------------------------------------------------------------------
 arch/x86/boot/main.c    ------  query_ist()   
 INT 15h
 INT 15h, AX=E801h - Get Memory Size for Large Configurations
 INT 15h, AX=E820h - Query System Address Map
 INT 15h, AH=88h - Get Extended Memory Size
 等等。
------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
