@@ -1,5 +1,9 @@
 启动顺序
-./larch/i386/boot/bootSect.S–>./larch/i386/boot/setup.S–>./larch/i386/kernel/head.S–>./init/main.c中的start_kernel()
+./larch/i386/boot/bootSect.S    #在4.4.38没找到
+–>./larch/i386/boot/setup.S     #在4.4.38没找到
+–>arch/x86/boot/header.S        #calll	main
+–>arch/x86/boot/main.c中的main() 
+->arch/x86/boot/pm.c中的go_to_protected_mode()
 
 汇编INT 0x10h 是输出到显示， 0x16h是读键盘输入, 0x19h是系统自举。即：
 INT 19会将MBR的512字节装载到内存0x7c00中,然后JUMP到0x7c00处,开始执行MBR的可执行程序(master booter)。
