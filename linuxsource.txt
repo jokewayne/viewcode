@@ -7,10 +7,17 @@
 –>arch/x86/boot/main.c中的main() 
 ->arch/x86/boot/pm.c中的go_to_protected_mode()
   # 激活A20总线是保护模式在引导阶段的步骤之一，通常在引导程序将控制权交给内核之前完成
--> arch/i386/boot/pmjump.S  的　protected_mode_jump()    
+-> arch/x86/boot/pmjump.S  的　protected_mode_jump()    
   # 入参是　code32_start, 定义在　arch/x86/boot/header.S   值为 0x100000
   #　即跳转到了 0x100000地址开始执行。  这里是 head_32.S 的 startup_32。 
-  
+-> arch/x86/kernel/head_32.S 中
+  # 执行到 jmp *(initial_code) ，跳转到 
+  # ENTRY(initial_code)	
+  #  .long i386_start_kernel
+-> arch/x86/kernel/head32.c 中 i386_start_kernel() 然后调用 start_kernel()
+-> init/main.c 中 start_kernel()
+  # 到这里，真正的C语言代码开始了。kernel代码就从这里开始。
+------------------------------------------------------------------------------
 arch/i386/kernel/head_32.S　中　，　
   #完成以下操作：
 ·初始化段寄存器和一个临时堆栈
