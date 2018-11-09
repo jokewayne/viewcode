@@ -1,0 +1,2 @@
+启动顺序
+./larch/i386/boot/bootSect.S–>./larch/i386/boot/setup.S–>./larch/i386/kernel/head.S–>./init/main.c中的start_kernel()
