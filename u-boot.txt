@@ -1,3 +1,6 @@
+All base on u-boot_mod 
+ARCH=mips
+
 uboot.bin中的4000h地址，出现在内存中的0x00000000位置，为什么？
 另一方面确实证明了uboot是加载到0x00000000地址。
 uboot.bin中0x5f00地址，出现在内存0x80001F00。
