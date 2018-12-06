@@ -6,6 +6,8 @@
 //#include <linux/platform_device.h>
 //platform_device 和 device区别在哪？
 #include <linux/device.h>
+#include <linux/moduleparam.h>
+#include "sink.h"
 enum IOCMD {
     SHOW = 100,
     TEST2 ,
@@ -21,22 +23,35 @@ static struct cdev sink_cdev;
 static dev_t devno;
 static struct class *sink_class;
 static struct device *sink_dev;
-
+static int num = 7777;
+static char *author = "Joke Wayne";
+module_param(num, int, S_IRUGO|S_IWUSR);
+MODULE_PARM_DESC(num,"this is num ,just for test ,by jokewayne");
+module_param(author,charp, S_IRUGO);
 static long sink_ioctl(struct file *filp, u_int cmd, u_long arg)
 {
     int err = -EINVAL;
+    int a= 9 , b = 20, c = -1, d = -1;
+    char * stra = "abcdefg", * strb = "ABCDEFG";
+    char * strc = NULL;
     switch (cmd) {
         case SHOW:
             printk(KERN_INFO "sink_ioctl show %ld\n",arg);
+            c = add_sink(a,b);
+            printk(KERN_INFO "a + b = %d\n",c);
             break;
         case TEST2:
             printk(KERN_INFO "sink_ioctl test2\n");
+            d = multip_sink(a,b);
+            printk(KERN_INFO "a * b = %d\n",d);
             break;
         case PARAM:
             printk(KERN_INFO "sink_ioctl param:%ld\n", arg);
             break;
         case TEST4:
-            printk(KERN_INFO "sink_ioctl test4\n");
+            printk(KERN_INFO "sink_ioctl test4 20181205\n");
+            strc = abcd_sink(stra,strb);  
+            printk(KERN_INFO "stra[%s],strb[%s],strc = [%s]\n",stra,strb,strc);
             break;
         case MONDAY:
             printk(KERN_INFO "sink_ioctl MONDAY\n");
@@ -82,7 +97,8 @@ static int sink_init(void)
 {
     int err;  
     void *ptr_err;
-    printk(KERN_INFO "sink say hell world\n");
+    printk(KERN_INFO "sink say hell world with param\n");
+    printk(KERN_INFO "num = %d , author = %s\n",num,author);
     /* 注册字符设备 */
     err = alloc_chrdev_region(&devno, 0, 1, SINKDEV_NAME);
     if (err != 0) {
@@ -130,7 +146,6 @@ static void sink_exit(void)
     unregister_chrdev_region(devno, 1); /*释放设备号*/
     printk(KERN_INFO "sink leaves!\n");
 }
-
 MODULE_LICENSE("GPL");
 
 module_init(sink_init);

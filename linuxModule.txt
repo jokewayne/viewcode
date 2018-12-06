@@ -1,17 +1,34 @@
 
+DRIVER_ATTR，DRIVER_ATTR、BUS_ATTR，CLASS_ATTR
+可以在sys fs中添加“文件”
+DEVICE_ATTR对应的文件在/sys/devices/目录中对应的device下面。
+而其他几个分别在driver，bus，class中对应的目录下。
+先看看DEVICE_ATTR的原型：
+DEVICE_ATTR(_name, _mode, _show, _store)
+    _name：名称，也就是将在sys fs中生成的文件名称。
+    _mode：上述文件的访问权限，与普通文件相同，UGO的格式。
+    _show：显示函数，cat该文件时，此函数被调用。
+    _store：写函数，echo内容到该文件时，此函数被调用。
+
+-----------------------------------------------------
+
 http://blog.csdn.net/thl789/article/details/6581146
 在内核源代码中，platform 设备的初始化
 LINUX内核中有很多的初始化指示标志
 postcore_initcall(), arch_initcall(), subsys_initcall(), device_initcall(), etc. 
 这些起什么作用呢？
 见 内核源码 include/linux/init.h，大约在第200行。 
-
+-----------------------------------------------------
 
 对硬件I/O操作
 request_mem_region 与 ioremap
-
+-----------------------------------------------------
 platform的简介
 https://www.cnblogs.com/deng-tao/p/6026373.html
-
+-----------------------------------------------------
 sysfs   /sys目录讲解
 https://www.ibm.com/developerworks/cn/linux/l-cn-sysfs/
+-----------------------------------------------------
+module_usb_driver()
+
+
