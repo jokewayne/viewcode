@@ -3,5 +3,7 @@
 # this is add in third branch.
 # adding on 9 Nov, 2018.
 
-# 接口测试
-# https://www.cnblogs.com/feng0815/p/7509541.html
+# 接口测试 https://www.cnblogs.com/feng0815/p/7509541.html
+
+
+# linux 日志 https://www.cnblogs.com/hehheai/p/6513693.html
