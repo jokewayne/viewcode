@@ -7,3 +7,6 @@
 
 
 # linux 日志 https://www.cnblogs.com/hehheai/p/6513693.html
+
+不同版本linux 启动的脚本 如 init 和 systemd。
+
