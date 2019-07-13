@@ -1,0 +1,7 @@
+# introduce to cross compile
+
+download cross compile tools and unzip
+add cross compile tool /bin directory to PATH
+add cross compile tool /lib to LD_LIBRARY_PATH
+then you can use cross compile tool to compile source code.
+ 
