@@ -6,3 +6,6 @@ export JAVA_HOME=/usr/share/java/jdk1.8.0_212
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 export PATH=$JAVA_HOME/bin:$PATH
 
+# install anaconda3 to home directory
+add to path
+export PATH=$PATH:$HOME/bin
