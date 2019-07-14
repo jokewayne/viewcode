@@ -15,7 +15,7 @@ pip3 install --upgrade pip
 # modified pip3 to fix bugs, from pip._internal import main
 sudo vi /usr/bin/pip3 
 change the line to : from pip._internal import main
-
+# change tensorflow version to 1.5
 pip3 uninstall tensorflow
 pip3 install tensorflow==1.5 --user
 # conda python3 version is 3.7.3, tensorflow corrupted.
