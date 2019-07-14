@@ -9,3 +9,16 @@ export PATH=$JAVA_HOME/bin:$PATH
 # install anaconda3 to home directory
 add to path
 export PATH=$PATH:$HOME/bin
+
+# upgrade pip3 > 18.0
+pip3 install --upgrade pip
+# modified pip3 to fix bugs, from pip._internal import main
+sudo vi /usr/bin/pip3 
+change the line to : from pip._internal import main
+
+pip3 uninstall tensorflow
+pip3 install tensorflow==1.5 --user
+# conda python3 version is 3.7.3, tensorflow corrupted.
+conda deactivate
+#python3 version is 3.6.8, import tensorflow successfully.
+python3
