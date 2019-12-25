@@ -4,4 +4,28 @@ download cross compile tools and unzip
 add cross compile tool /bin directory to PATH
 add cross compile tool /lib to LD_LIBRARY_PATH
 then you can use cross compile tool to compile source code.
- 
+
+# make a cross compile to
+using crosstool-ng
+download crosstool-ng from website,
+tar -xzvf crosstool-ng.tar.gz
+cd crosstool-ng-version
+./configure -prefix=/opt/crosstool-ng/
+make
+sudo make install
+packages needs by crosstool-ng listed in /opt/crosstools-ng/share/crosstool-ng/packages
+download all the packages with the right version. 
+put them in ${HOME}/src  directory.
+add /opt/crosstool-ng/bin to PATH
+mkdir xtools-config
+cd xtools-config
+ct-ng list-samples
+#choose a sample
+ct-ng powerpc-xxxxxx
+# make some config  changes
+ct-ng menuconfig 
+# check for .config file
+ct-ng show-config
+# now build 
+ct-ng build
+# new crosstool will be in ${HOME}/x-tools
